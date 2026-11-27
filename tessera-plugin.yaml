@@ -1,7 +1,7 @@
 # The manifest: who made the plugin, what it may do, and what the Tessera app shows. It holds no code and no words:
 # every name, label and hint below is a key into translations/<language>.json, part "app". Every field: docs/MANIFEST.md.
 id: status_action
-version: 0.2.0
+version: 0.3.0
 # Entity options a person chooses per tile (0.15): the entity whose state the tile shows, and the one its tap acts on.
 api: "0.15"
 icon: gesture-tap-button
@@ -63,3 +63,112 @@ tiles:
           - { value: small, label: size_small }
       # The target's name under the state. Off gives the whole tile to the state.
       - { id: show_action, kind: toggle, default: true, label: opt_show_action, hint: opt_show_action_hint }
+      # The colour of the state, overriding the built-in semantic palette. States fall in three groups: the resting ones
+      # (off, disarmed, closed, locked, home, idle), the engaged ones (on, armed, open, unlocked) and the alert ones
+      # (triggered, arming, pending). "Default" keeps each state's own built-in colour; the alert group always keeps its
+      # built-in red/amber so an alarm stands out, and takes an icon only.
+      - id: color_calm
+        kind: choice
+        label: opt_color_calm
+        hint: opt_color_calm_hint
+        default: default
+        choices:
+          - { value: default, label: col_default }
+          - { value: grey, label: col_grey }
+          - { value: green, label: col_green }
+          - { value: blue, label: col_blue }
+          - { value: red, label: col_red }
+      - id: color_active
+        kind: choice
+        label: opt_color_active
+        hint: opt_color_active_hint
+        default: default
+        choices:
+          - { value: default, label: col_default }
+          - { value: grey, label: col_grey }
+          - { value: green, label: col_green }
+          - { value: blue, label: col_blue }
+          - { value: red, label: col_red }
+      # A per-state icon from Tessera's built-in set, shown in place of the status dot and changing with the state.
+      # "None" keeps the plain dot. The three options give the resting, engaged and alert groups each their own icon.
+      - id: icon_calm
+        kind: choice
+        label: opt_icon_calm
+        hint: opt_icon_calm_hint
+        default: none
+        choices:
+          - { value: none, label: ico_none }
+          - { value: F068A, label: ico_shield }
+          - { value: F033E, label: ico_lock }
+          - { value: F0FC6, label: ico_lock_open }
+          - { value: F081B, label: ico_door_closed }
+          - { value: F081C, label: ico_door_open }
+          - { value: F06D9, label: ico_garage }
+          - { value: F0335, label: ico_light }
+          - { value: F0E4F, label: ico_light_off }
+          - { value: F0425, label: ico_power }
+          - { value: F0521, label: ico_toggle }
+          - { value: F009A, label: ico_bell }
+          - { value: F009E, label: ico_bell_ring }
+          - { value: F078F, label: ico_alarm }
+          - { value: F05D6, label: ico_alert }
+          - { value: F0238, label: ico_fire }
+          - { value: F012C, label: ico_check }
+          - { value: F070E, label: ico_run }
+          - { value: F02DC, label: ico_home }
+          - { value: F0210, label: ico_fan }
+          - { value: F0BC2, label: ico_script }
+      - id: icon_active
+        kind: choice
+        label: opt_icon_active
+        hint: opt_icon_active_hint
+        default: none
+        choices:
+          - { value: none, label: ico_none }
+          - { value: F068A, label: ico_shield }
+          - { value: F033E, label: ico_lock }
+          - { value: F0FC6, label: ico_lock_open }
+          - { value: F081B, label: ico_door_closed }
+          - { value: F081C, label: ico_door_open }
+          - { value: F06D9, label: ico_garage }
+          - { value: F0335, label: ico_light }
+          - { value: F0E4F, label: ico_light_off }
+          - { value: F0425, label: ico_power }
+          - { value: F0521, label: ico_toggle }
+          - { value: F009A, label: ico_bell }
+          - { value: F009E, label: ico_bell_ring }
+          - { value: F078F, label: ico_alarm }
+          - { value: F05D6, label: ico_alert }
+          - { value: F0238, label: ico_fire }
+          - { value: F012C, label: ico_check }
+          - { value: F070E, label: ico_run }
+          - { value: F02DC, label: ico_home }
+          - { value: F0210, label: ico_fan }
+          - { value: F0BC2, label: ico_script }
+      - id: icon_alert
+        kind: choice
+        label: opt_icon_alert
+        hint: opt_icon_alert_hint
+        default: none
+        choices:
+          - { value: none, label: ico_none }
+          - { value: F068A, label: ico_shield }
+          - { value: F033E, label: ico_lock }
+          - { value: F0FC6, label: ico_lock_open }
+          - { value: F081B, label: ico_door_closed }
+          - { value: F081C, label: ico_door_open }
+          - { value: F06D9, label: ico_garage }
+          - { value: F0335, label: ico_light }
+          - { value: F0E4F, label: ico_light_off }
+          - { value: F0425, label: ico_power }
+          - { value: F0521, label: ico_toggle }
+          - { value: F009A, label: ico_bell }
+          - { value: F009E, label: ico_bell_ring }
+          - { value: F078F, label: ico_alarm }
+          - { value: F05D6, label: ico_alert }
+          - { value: F0238, label: ico_fire }
+          - { value: F012C, label: ico_check }
+          - { value: F070E, label: ico_run }
+          - { value: F02DC, label: ico_home }
+          - { value: F0210, label: ico_fan }
+          - { value: F0BC2, label: ico_script }

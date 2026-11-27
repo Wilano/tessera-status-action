@@ -3,15 +3,23 @@
 tiles:
   - tile: control
     name: Alarm
-    options: { status: alarm_control_panel.alarmo, target: script.alarm_umschalten, action: toggle, confirm: true, confirm_lang: de }
+    options: { status: alarm_control_panel.alarmo, target: script.alarm_umschalten, action: toggle, confirm: true, confirm_lang: de, icon_active: F068A, icon_alert: F078F }
     sizes: [1x1, 2x1, 2x2]
   - tile: control
     name: Front door
-    options: { status: lock.front_door, target: switch.porch_light, action: toggle, show_action: false }
+    options: { status: lock.front_door, target: switch.porch_light, action: toggle, show_action: false, icon_calm: F033E, icon_active: F0FC6 }
     sizes: [1x1, 2x2]
   - tile: control
+    name: Desk light
+    options: { status: switch.desk_light, target: switch.desk_light, action: toggle, color_active: green, icon_active: F0335, icon_calm: F0E4F }
+    sizes: [1x1, 2x1]
+  - tile: control
+    name: Shed alarm
+    options: { status: alarm_control_panel.shed, target: script.alarm_umschalten, action: toggle, icon_alert: F078F, icon_active: F068A }
+    sizes: [1x1, 2x1]
+  - tile: control
     name: Garage
-    options: { status: cover.garage, target: cover.garage, action: toggle, text_size: small }
+    options: { status: cover.garage, target: cover.garage, action: toggle, text_size: small, icon_calm: F081B, icon_active: F081C }
     sizes: [1x1, 2x1]
   - tile: control
     name: Boiler
@@ -26,6 +34,8 @@ states:
   script.alarm_umschalten: { state: "off", attributes: { friendly_name: "Alarm umschalten" } }
   lock.front_door: { state: "locked", attributes: { friendly_name: "Front door" } }
   switch.porch_light: { state: "off", attributes: { friendly_name: "Porch light" } }
+  switch.desk_light: { state: "on", attributes: { friendly_name: "Desk light" } }
+  alarm_control_panel.shed: { state: "triggered", attributes: { friendly_name: "Shed alarm" } }
   cover.garage: { state: "closed", attributes: { friendly_name: "Garage door" } }
   sensor.boiler_temperature: { state: "61.4", attributes: { unit_of_measurement: "°C", device_class: temperature, friendly_name: Boiler } }
   scene.evening: { state: "unknown", attributes: { friendly_name: "Evening scene" } }

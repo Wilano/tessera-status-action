@@ -16,6 +16,37 @@ static std::string lower(const std::string &in) {
   return out;
 }
 
+// A state falls in one of three groups, so a person can colour or icon the states together: the resting ones, the
+// engaged ones, and the alert ones (the alarm fired or is on its way to armed).
+enum class Bucket { CALM = 0, ACTIVE = 1, ALERT = 2 };
+
+// A chosen icon arrives as its five-hex-digit Material Design Icons codepoint ("F033E"); anything else is 0, and the
+// tile keeps its dot. The firmware's icon fonts carry only Tessera's set (plugin.yaml lists the names), so a codepoint
+// outside the private-use area, or one not in that set, draws nothing.
+static uint32_t icon_cp(const std::string &hex) {
+  if (hex.size() != 5) return 0;
+  uint32_t v = 0;
+  for (char c : hex) {
+    const int d = c >= '0' && c <= '9' ? c - '0' : c >= 'A' && c <= 'F' ? c - 'A' + 10
+                  : c >= 'a' && c <= 'f'                                 ? c - 'a' + 10
+                                                                         : -1;
+    if (d < 0) return 0;
+    v = v << 4 | static_cast<uint32_t>(d);
+  }
+  return v >= 0xF0000 && v <= 0xFFFFD ? v : 0;
+}
+
+// The option's word for a colour, to a tone; an unknown word (including "default") leaves the state's built-in tone.
+static bool color_tone(const std::string &word, Tone &out) {
+  if (word == "grey") out = Tone::NORMAL;
+  else if (word == "green") out = Tone::GOOD;
+  else if (word == "blue") out = Tone::ACCENT;
+  else if (word == "amber") out = Tone::BUSY;
+  else if (word == "red") out = Tone::ALERT;
+  else return false;
+  return true;
+}
+
 // The tile: an entity's state up top, and a tap that acts on a second entity (a toggle, a script, a scene, a button).
 // create() reads the options and makes the parts; on_state keeps the chosen entities' states; on_tick paints them.
 class ControlTile : public tessera::Tile {
@@ -37,8 +68,17 @@ class ControlTile : public tessera::Tile {
     confirm_de_ = std::string(c.options["confirm_lang"] | "en") == "de";
     big_ = std::string(c.options["text_size"] | "large") != "small";
     show_foot_ = c.options["show_action"] | true;
+    // The per-group colour and icon overrides, read once. A group whose colour stays "default" keeps the state's own
+    // built-in tone; the alert group has no colour override, so an alarm always keeps its red or amber.
+    color_set_[int(Bucket::CALM)] = color_tone(std::string(c.options["color_calm"] | "default"), color_ov_[int(Bucket::CALM)]);
+    color_set_[int(Bucket::ACTIVE)] = color_tone(std::string(c.options["color_active"] | "default"), color_ov_[int(Bucket::ACTIVE)]);
+    color_set_[int(Bucket::ALERT)] = false;
+    icon_cp_[int(Bucket::CALM)] = icon_cp(std::string(c.options["icon_calm"] | "none"));
+    icon_cp_[int(Bucket::ACTIVE)] = icon_cp(std::string(c.options["icon_active"] | "none"));
+    icon_cp_[int(Bucket::ALERT)] = icon_cp(std::string(c.options["icon_alert"] | "none"));
 
     dot_ = ui::block(c.parent, theme::MUTED);
+    icon_ = ui::label(c.parent, Font::ICON_SMALL, theme::MUTED);
     name_ = ui::label(c.parent, Font::BODY, theme::MUTED);
     state_ = ui::label(c.parent, Font::HEADLINE, theme::INK);
     foot_ = ui::label(c.parent, Font::BODY, theme::MUTED);
@@ -129,10 +169,20 @@ class ControlTile : public tessera::Tile {
     return {out, Tone::NORMAL};
   }
 
+  // Which group the state is in, for the colour and icon overrides.
+  Bucket bucket_() const {
+    const std::string k = lower(status_state_);
+    if (k == "triggered" || k == "arming" || k == "pending") return Bucket::ALERT;
+    if (k == "on" || k.rfind("armed", 0) == 0 || k == "open" || k == "opening" || k == "unlocked" || k == "unlocking")
+      return Bucket::ACTIVE;
+    return Bucket::CALM;
+  }
+
   void paint_() {
     std::string top = !tile_name_.empty() ? tile_name_ : status_name_;
     std::string center;
     Tone tone = Tone::NORMAL;
+    uint32_t cp = 0;  // the icon for this state, 0 for the plain dot
     if (confirming_) {
       center = plugin_->text(confirm_de_ ? "confirm_tap_de" : "confirm_tap");
       tone = Tone::BUSY;
@@ -143,21 +193,35 @@ class ControlTile : public tessera::Tile {
       auto r = state_word_();
       center = r.first;
       tone = r.second;
+      const int bi = int(bucket_());
+      if (color_set_[bi]) tone = color_ov_[bi];  // the chosen colour, or the state's own
+      cp = icon_cp_[bi];                          // the chosen icon, or 0 for the dot
     }
     const std::string foot = (show_foot_ && !target_name_.empty() && !confirming_) ? target_name_ : std::string();
 
-    // Top row: a dot in the state's colour, the name beside it.
+    // Top row: a dot in the state's colour, or a per-state icon in its place, the name beside it.
     const int head = top.empty() ? 0 : ui::line_height(Font::BODY);
     const int dot = ui::px(ui::large() ? 12 : 8);
-    ui::set_fill(dot_, acting_ ? Tone::BUSY : tone, theme::MUTED);
+    const std::string glyph = cp ? ui::icon(cp) : std::string();
+    const bool use_icon = head && !glyph.empty();
+    const int icon_h = ui::line_height(Font::ICON_SMALL);
+    const int lead = use_icon ? ui::text_width(glyph, Font::ICON_SMALL) : dot;
+    const Tone mark_tone = acting_ ? Tone::BUSY : tone;
+    // the dot, shown unless an icon takes its place
+    ui::set_fill(dot_, mark_tone, theme::MUTED);
     lv_obj_set_size(dot_, dot, dot);
     lv_obj_set_style_radius(dot_, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_opa(dot_, head ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
+    lv_obj_set_style_opa(dot_, (head && !use_icon) ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
     lv_obj_set_pos(dot_, 0, (head - dot) / 2);
+    // the icon, shown in the dot's place when the state's group has one
+    ui::set_tone(icon_, mark_tone, theme::MUTED);
+    ui::set_text(icon_, use_icon ? glyph : std::string());
+    lv_obj_set_size(icon_, use_icon ? std::max(1, lead) : 1, use_icon ? icon_h : 1);
+    lv_obj_set_pos(icon_, 0, use_icon ? (head - icon_h) / 2 : 0);
     ui::set_color(name_, theme::MUTED);
     ui::set_text(name_, top);
-    lv_obj_set_pos(name_, head ? dot + ui::px(6) : 0, 0);
-    lv_obj_set_size(name_, head ? std::max(1, width_ - dot - ui::px(6)) : width_, head ? head : 1);
+    lv_obj_set_pos(name_, head ? lead + ui::px(6) : 0, 0);
+    lv_obj_set_size(name_, head ? std::max(1, width_ - lead - ui::px(6)) : width_, head ? head : 1);
 
     const int foot_h = foot.empty() ? 0 : ui::line_height(Font::BODY);
     const int band = std::max(1, height_ - head - foot_h);
@@ -194,11 +258,14 @@ class ControlTile : public tessera::Tile {
   int width_ = 0, height_ = 0;
   std::string tile_name_, target_id_, service_;
   bool confirm_opt_ = false, confirm_de_ = false, big_ = true, show_foot_ = true;
+  bool color_set_[3] = {false, false, false};
+  Tone color_ov_[3] = {Tone::NORMAL, Tone::NORMAL, Tone::NORMAL};
+  uint32_t icon_cp_[3] = {0, 0, 0};
   bool have_status_ = false;
   std::string status_state_, status_name_, status_unit_, target_name_;
   bool confirming_ = false, acting_ = false;
   uint32_t epoch_ = 0, confirm_since_ = 0, act_since_ = 0;
-  lv_obj_t *dot_{}, *name_{}, *state_{}, *foot_{};
+  lv_obj_t *dot_{}, *icon_{}, *name_{}, *state_{}, *foot_{};
 };
 
 void StatusAction::setup() {
