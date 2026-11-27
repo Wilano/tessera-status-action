@@ -34,6 +34,9 @@ class ControlTile : public tessera::Tile {
     else if (verb == "press") service_ = "button.press";
     else service_ = "homeassistant.toggle";
     confirm_opt_ = c.options["confirm"] | false;
+    confirm_de_ = std::string(c.options["confirm_lang"] | "en") == "de";
+    big_ = std::string(c.options["text_size"] | "large") != "small";
+    show_foot_ = c.options["show_action"] | true;
 
     dot_ = ui::block(c.parent, theme::MUTED);
     name_ = ui::label(c.parent, Font::BODY, theme::MUTED);
@@ -131,7 +134,7 @@ class ControlTile : public tessera::Tile {
     std::string center;
     Tone tone = Tone::NORMAL;
     if (confirming_) {
-      center = plugin_->text("confirm_tap");
+      center = plugin_->text(confirm_de_ ? "confirm_tap_de" : "confirm_tap");
       tone = Tone::BUSY;
     } else if (!have_status_) {
       center = plugin_->text(target_id_.empty() ? "pick_status" : "no_status");
@@ -141,7 +144,7 @@ class ControlTile : public tessera::Tile {
       center = r.first;
       tone = r.second;
     }
-    const std::string foot = (!target_name_.empty() && !confirming_) ? target_name_ : std::string();
+    const std::string foot = (show_foot_ && !target_name_.empty() && !confirming_) ? target_name_ : std::string();
 
     // Top row: a dot in the state's colour, the name beside it.
     const int head = top.empty() ? 0 : ui::line_height(Font::BODY);
@@ -159,9 +162,15 @@ class ControlTile : public tessera::Tile {
     const int foot_h = foot.empty() ? 0 : ui::line_height(Font::BODY);
     const int band = std::max(1, height_ - head - foot_h);
 
-    // The biggest of the screen's fonts the state fits in, both across and down.
-    Font face = Font::BODY_LARGE;
-    for (Font f : {Font::VALUE, Font::HEADLINE, Font::TITLE, Font::BODY_LARGE}) {
+    // The biggest of the screen's fonts the state fits in, both across and down. "Small" starts one step down, so a
+    // short state sits calmer with more room around it.
+    static const Font big_fonts[] = {Font::VALUE, Font::HEADLINE, Font::TITLE, Font::BODY_LARGE};
+    static const Font small_fonts[] = {Font::TITLE, Font::BODY_LARGE, Font::BODY};
+    Font face = big_ ? Font::BODY_LARGE : Font::BODY;
+    const Font *fonts = big_ ? big_fonts : small_fonts;
+    const int n = big_ ? 4 : 3;
+    for (int i = 0; i < n; ++i) {
+      const Font f = fonts[i];
       if (ui::text_width(center, f) <= width_ && ui::line_height(f) <= band) { face = f; break; }
     }
     ui::set_font(state_, face);
@@ -184,7 +193,7 @@ class ControlTile : public tessera::Tile {
   const tessera::Plugin *plugin_;
   int width_ = 0, height_ = 0;
   std::string tile_name_, target_id_, service_;
-  bool confirm_opt_ = false;
+  bool confirm_opt_ = false, confirm_de_ = false, big_ = true, show_foot_ = true;
   bool have_status_ = false;
   std::string status_state_, status_name_, status_unit_, target_name_;
   bool confirming_ = false, acting_ = false;

@@ -22,7 +22,8 @@
     "s_unknown": "Unknown",
     "pick_status": "Choose an entity",
     "no_status": "Choose what to show",
-    "confirm_tap": "Tap again"
+    "confirm_tap": "Tap again",
+    "confirm_tap_de": "Erneut drücken"
   },
   "app": {
     "name": "Status & action",
@@ -40,6 +41,16 @@
     "act_turn_off": "Turn off",
     "act_press": "Press",
     "opt_confirm": "Ask before acting",
-    "opt_confirm_hint": "The first tap asks, the second acts. For a target that matters, such as an alarm."
+    "opt_confirm_hint": "The first tap asks, the second acts. For a target that matters, such as an alarm.",
+    "opt_confirm_lang": "Prompt language",
+    "opt_confirm_lang_hint": "The words of the \"tap again\" prompt when Ask before acting is on.",
+    "lang_en": "English (Tap again)",
+    "lang_de": "Deutsch (Erneut drücken)",
+    "opt_text_size": "Status size",
+    "opt_text_size_hint": "How big the state word is: large fills the tile, small leaves more room.",
+    "size_large": "Large",
+    "size_small": "Small",
+    "opt_show_action": "Show the action below",
+    "opt_show_action_hint": "Off hides the target's name and gives the state the whole tile."
   }
 }
