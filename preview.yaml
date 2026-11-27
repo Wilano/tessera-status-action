@@ -1,0 +1,31 @@
+# What tools/preview.py shows (docs/PREVIEW.md): the tile with the entities its options chose, in the states that make
+# its colours and words show. The option's value is an entity id; `states:` below gives each one its state.
+tiles:
+  - tile: control
+    name: Alarm
+    options: { status: alarm_control_panel.alarmo, target: script.alarm_umschalten, action: toggle, confirm: true }
+    sizes: [1x1, 2x1, 2x2]
+  - tile: control
+    name: Front door
+    options: { status: lock.front_door, target: switch.porch_light, action: toggle }
+    sizes: [1x1, 2x2]
+  - tile: control
+    name: Garage
+    options: { status: cover.garage, target: cover.garage, action: toggle }
+    sizes: [1x1, 2x1]
+  - tile: control
+    name: Boiler
+    options: { status: sensor.boiler_temperature, target: scene.evening, action: turn_on }
+    sizes: [2x1]
+  - tile: control
+    name: Not set up
+    sizes: [1x1]
+
+states:
+  alarm_control_panel.alarmo: { state: "armed_night", attributes: { friendly_name: Alarmo } }
+  script.alarm_umschalten: { state: "off", attributes: { friendly_name: "Alarm umschalten" } }
+  lock.front_door: { state: "locked", attributes: { friendly_name: "Front door" } }
+  switch.porch_light: { state: "off", attributes: { friendly_name: "Porch light" } }
+  cover.garage: { state: "closed", attributes: { friendly_name: "Garage door" } }
+  sensor.boiler_temperature: { state: "61.4", attributes: { unit_of_measurement: "°C", device_class: temperature, friendly_name: Boiler } }
+  scene.evening: { state: "unknown", attributes: { friendly_name: "Evening scene" } }

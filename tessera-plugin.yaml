@@ -1,0 +1,45 @@
+# The manifest: who made the plugin, what it may do, and what the Tessera app shows. It holds no code and no words:
+# every name, label and hint below is a key into translations/<language>.json, part "app". Every field: docs/MANIFEST.md.
+id: status_action
+version: 0.1.0
+# Entity options a person chooses per tile (0.15): the entity whose state the tile shows, and the one its tap acts on.
+api: "0.15"
+icon: gesture-tap-button
+maintainer: Wilano
+license: MIT
+stage: beta
+topics: [home]
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 5
+
+permissions:
+  # The tap runs one of these on the target entity (its id travels in the action's fields, so the entity may be a
+  # script, a scene or a button that Tessera draws no tile for).
+  home_assistant_actions: [homeassistant.toggle, homeassistant.turn_on, homeassistant.turn_off, button.press]
+
+tiles:
+  - id: control
+    name: tile_name
+    icon: gesture-tap-button
+    sizes: { min: 1x1, max: 2x2 }
+    memory: 600
+    example: tile_example
+    options:
+      # What the tile shows: any entity with a state worth reading.
+      - { id: status, kind: entity, domains: [alarm_control_panel, binary_sensor, sensor, switch, light, lock, cover, input_boolean], attributes: [unit_of_measurement, device_class], label: opt_status, hint: opt_status_hint }
+      # What a tap acts on: a second, different entity. A script, a scene or a button is reached too.
+      - { id: target, kind: entity, domains: [script, switch, input_boolean, light, scene, button, automation, fan], label: opt_target, hint: opt_target_hint }
+      - id: action
+        kind: choice
+        label: opt_action
+        hint: opt_action_hint
+        default: toggle
+        choices:
+          - { value: toggle, label: act_toggle }
+          - { value: turn_on, label: act_turn_on }
+          - { value: turn_off, label: act_turn_off }
+          - { value: press, label: act_press }
+      # A guard for a target that matters (an alarm): the first tap asks, the second acts.
+      - { id: confirm, kind: toggle, default: false, label: opt_confirm, hint: opt_confirm_hint }
