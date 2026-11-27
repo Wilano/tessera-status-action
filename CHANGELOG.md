@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+- **Status colour**: override the built-in palette for the resting states (off, disarmed, closed, locked, home, idle) and
+  the engaged states (on, armed, open, unlocked) — grey, green, blue or red. The alert states (triggered, arming,
+  pending) keep their red or amber so an alarm always stands out.
+- **Status icon**: show an icon in place of the dot, changing with the state — a separate icon for the resting, the
+  engaged and the alert states, from Tessera's built-in set (a shield, a lock, a door, a light, a bell, an alarm, ...).
+- Both default to how the tile looked before: the dot and the built-in colours, until you set them.
+
 ## 0.2.0
 - **Prompt language**: the "tap again" prompt can be German ("Erneut drücken") instead of English.
 - **Status size**: the state word can be large (fills the tile) or small (leaves more room).
