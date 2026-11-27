@@ -1,7 +1,7 @@
 # The manifest: who made the plugin, what it may do, and what the Tessera app shows. It holds no code and no words:
 # every name, label and hint below is a key into translations/<language>.json, part "app". Every field: docs/MANIFEST.md.
 id: status_action
-version: 0.1.0
+version: 0.2.0
 # Entity options a person chooses per tile (0.15): the entity whose state the tile shows, and the one its tap acts on.
 api: "0.15"
 icon: gesture-tap-button
@@ -43,3 +43,23 @@ tiles:
           - { value: press, label: act_press }
       # A guard for a target that matters (an alarm): the first tap asks, the second acts.
       - { id: confirm, kind: toggle, default: false, label: opt_confirm, hint: opt_confirm_hint }
+      # The language of the "tap again" prompt, for a screen used in German.
+      - id: confirm_lang
+        kind: choice
+        label: opt_confirm_lang
+        hint: opt_confirm_lang_hint
+        default: en
+        choices:
+          - { value: en, label: lang_en }
+          - { value: de, label: lang_de }
+      # How big the state word is: the biggest that fits (large), or one step down (small).
+      - id: text_size
+        kind: choice
+        label: opt_text_size
+        hint: opt_text_size_hint
+        default: large
+        choices:
+          - { value: large, label: size_large }
+          - { value: small, label: size_small }
+      # The target's name under the state. Off gives the whole tile to the state.
+      - { id: show_action, kind: toggle, default: true, label: opt_show_action, hint: opt_show_action_hint }

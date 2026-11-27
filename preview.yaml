@@ -3,15 +3,15 @@
 tiles:
   - tile: control
     name: Alarm
-    options: { status: alarm_control_panel.alarmo, target: script.alarm_umschalten, action: toggle, confirm: true }
+    options: { status: alarm_control_panel.alarmo, target: script.alarm_umschalten, action: toggle, confirm: true, confirm_lang: de }
     sizes: [1x1, 2x1, 2x2]
   - tile: control
     name: Front door
-    options: { status: lock.front_door, target: switch.porch_light, action: toggle }
+    options: { status: lock.front_door, target: switch.porch_light, action: toggle, show_action: false }
     sizes: [1x1, 2x2]
   - tile: control
     name: Garage
-    options: { status: cover.garage, target: cover.garage, action: toggle }
+    options: { status: cover.garage, target: cover.garage, action: toggle, text_size: small }
     sizes: [1x1, 2x1]
   - tile: control
     name: Boiler
