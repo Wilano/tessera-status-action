@@ -1,0 +1,4 @@
+# Bench output and caches — never committed.
+.preview/
+__pycache__/
+*.pyc
